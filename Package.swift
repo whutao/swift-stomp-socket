@@ -1,28 +1,30 @@
 // swift-tools-version: 5.8
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
-    name: "swift-stomp-socket",
-    products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
-            name: "swift-stomp-socket",
-            targets: ["swift-stomp-socket"]),
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
-        .target(
-            name: "swift-stomp-socket",
-            dependencies: []),
-        .testTarget(
-            name: "swift-stomp-socketTests",
-            dependencies: ["swift-stomp-socket"]),
-    ]
+	name: "StompSocket",
+	platforms: [
+		.iOS(.v15)
+	],
+	products: [
+		.library(name: "StompSocket", targets: ["StompSocket"])
+	],
+	dependencies: [
+		.package(
+			url: "https://github.com/Romixery/SwiftStomp",
+			from: Version(1, 1, 1)
+		)
+	],
+	targets: [
+		.target(
+			name: "StompSocket",
+			dependencies: [
+				.product(name: "SwiftStomp", package: "SwiftStomp")
+			]
+		),
+		.testTarget(
+			name: "StompSocketTests",
+			dependencies: ["StompSocket"]
+		)
+	]
 )
