@@ -148,15 +148,8 @@ extension STOMPSocket: SwiftStompDelegate {
 	}
 	
 	public func onDisconnect(swiftStomp: SwiftStomp, disconnectType: StompDisconnectType) {
-		switch disconnectType {
-		case .fromSocket:
-			eventHandler(self, .didDisconnect)
-			stompClient.delegate = nil
-		case .fromStomp:
-			// If auto-connect is enabled, websocket will reconnect soon.
-			// Otherwise, it will be completelly disconnected soon.
-			break
-		}
+		eventHandler(self, .didDisconnect)
+		stompClient.delegate = nil
 	}
 	
 	public func onMessageReceived(
