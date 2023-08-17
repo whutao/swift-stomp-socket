@@ -25,13 +25,14 @@ public final class STOMPSocket {
 		return (stompClient.connectionStatus == .fullyConnected)
 	}
 	
+	/// Closure that handles exposed events.
+	public var eventHandler: ((STOMPSocket, Event) -> Void)?
+	
 	// MARK: Private properties
 	
 	public var isConnecting: Bool {
 		return (stompClient.connectionStatus == .connecting)
 	}
-	
-	private var eventHandler: (STOMPSocket, Event) -> Void
 	
 	private let stompClient: SwiftStomp
 	
@@ -61,8 +62,7 @@ public final class STOMPSocket {
 		connectionTimeout timeIntervalForTimeout: TimeInterval = 10,
 		autoPingInterval timeIntervalForPing: TimeInterval = 10,
 		receivedMessageTypes: [Decodable.Type] = [],
-		receivedMessageJSONDecoder: JSONDecoder = JSONDecoder(),
-		eventHandler: @escaping (STOMPSocket, Event) -> Void = { _, _ in }
+		receivedMessageJSONDecoder: JSONDecoder = JSONDecoder()
 	) {
 		self.stompClient = SwiftStomp(
 			host: connectionUrl,
@@ -72,7 +72,6 @@ public final class STOMPSocket {
 		self.timeIntervalForPing = timeIntervalForPing
 		self.receivedMessageTypes = receivedMessageTypes
 		self.receivedMessageJSONDecoder = receivedMessageJSONDecoder
-		self.eventHandler = eventHandler
 	}
 	
 	// MARK: Exposed methods
@@ -88,7 +87,7 @@ public final class STOMPSocket {
 		}
 		stompClient.delegate = self
 		stompClient.connect(timeout: timeIntervalForTimeout, autoReconnect: true)
-		eventHandler(self, .isConnecting)
+		eventHandler?(self, .isConnecting)
 	}
 	
 	/// Disconnectes web-socket. If `force` disconnection is chosen,
@@ -99,7 +98,7 @@ public final class STOMPSocket {
 		stompClient.disconnect(force: force)
 		if force {
 			stompClient.delegate = nil
-			eventHandler(self, .didDisconnect)
+			eventHandler?(self, .didDisconnect)
 		}
 	}
 	
@@ -143,12 +142,12 @@ extension STOMPSocket: SwiftStompDelegate {
 		case .toStomp:
 			// Enable automatic pings iff connected via STOMP.
 			stompClient.enableAutoPing(pingInterval: timeIntervalForPing)
-			eventHandler(self, .didConnect)
+			eventHandler?(self, .didConnect)
 		}
 	}
 	
 	public func onDisconnect(swiftStomp: SwiftStomp, disconnectType: StompDisconnectType) {
-		eventHandler(self, .didDisconnect)
+		eventHandler?(self, .didDisconnect)
 		stompClient.delegate = nil
 	}
 	
@@ -177,7 +176,7 @@ extension STOMPSocket: SwiftStompDelegate {
 					decodeType.self,
 					from: messageData
 				)
-				eventHandler(self, .didReceivePayload(
+				eventHandler?(self, .didReceivePayload(
 					decodedMessage,
 					from: destination
 				))
@@ -195,7 +194,7 @@ extension STOMPSocket: SwiftStompDelegate {
 		receiptId: String?,
 		type: StompErrorType
 	) {
-		eventHandler(self, .didReceiveError(description: briefDescription))
+		eventHandler?(self, .didReceiveError(description: briefDescription))
 	}
 
 	public func onReceipt(swiftStomp: SwiftStomp, receiptId: String) {
