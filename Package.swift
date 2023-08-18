@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-	name: "StompSocket",
+	name: "swift-stomp-socket",
 	platforms: [
 		.iOS(.v15)
 	],
